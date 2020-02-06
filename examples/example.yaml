@@ -1,0 +1,45 @@
+
+---
+classes:
+  - ntp
+  - zabbix::agent
+  - zabbix::userparameter
+  - sudo
+  - types
+  - common
+  - ganglia::gmond
+  - iptables
+  - java_ks::config
+  - yum
+  - ca_cert
+
+
+vlan1: 10.70.106.0/24
+vlan2: 10.68.112.0/24
+vlan3: 10.70.112.0/24
+
+iptables::package_name: 'iptables-services'
+iptables::service_name: 'iptables'
+iptables::rules_command: |
+        /usr/sbin/iptables -F;
+        /usr/sbin/iptables -F -t nat;
+        /usr/sbin/iptables -N LOG_AND_REJECT;
+        /usr/sbin/iptables -A LOG_AND_REJECT -j LOG --log-uid;
+        /usr/sbin/iptables -A LOG_AND_REJECT -j REJECT --reject-with icmp-host-prohibited;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --dport 8888 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --dport 8889 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --dport 1443 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --dport 22 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 25 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 53 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 88 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 139 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 445 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 3268 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 3269 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 389 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 636 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 1433 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 --sport 9418 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -m multiport -p tcp -s %{hiera('vlan1')},%{hiera('vlan2')} -d %{hiera('vlan3')} --sports 3456:3457 -j ACCEPT;
+        /usr/sbin/iptables -A INPUT -m tcp -p tcp -s 0.0.0.0/0 -j LOG_AND_REJECT;
